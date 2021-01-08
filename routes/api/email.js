@@ -8,14 +8,14 @@ router.post('/review', (req, res) => {
 		const mailOptions = {
 			from: req.body.email, // sender address
 			to: process.env.email, // list of receivers
-			subject: req.body.subject, // Subject line
+			subject: 'WGFS Review Submitted', // Subject line
 			html: `
-		<p>You have a new contact request.</p>
-		<h3>Contact Details</h3>
+		<p>You have a new review.</p>
+		<h3>Review Details</h3>
 		<ul>
 		  <li>Name: ${req.body.name}</li>
 		  <li>Email: ${req.body.email}</li>
-		  <li>Subject: ${req.body.subject}</li>
+		  <li>Rating: ${req.body.rating}</li>
 		  <li>Message: ${req.body.message}</li>
 		</ul>
 		`
@@ -25,7 +25,7 @@ router.post('/review', (req, res) => {
 			if (err) {
 				res.status(500).send({
 					success: false,
-					message: 'Something went wrong. Try again later'
+					message: 'Something went wrong. Try again later 2'
 				});
 			} else {
 				res.send({
@@ -37,7 +37,7 @@ router.post('/review', (req, res) => {
 	} catch (error) {
 		res.status(500).send({
 			success: false,
-			message: 'Something went wrong. Try again later'
+			message: 'Something went wrong. Try again later 1'
 		});
 	}
 });
