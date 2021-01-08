@@ -4,7 +4,6 @@ const http = require('http');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const errorhandler = require('errorhandler');
-const key = require('./env-config.js');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -65,8 +64,8 @@ app.use(function(err, req, res, next) {
 });
 
 //starting server
-app.listen(3000, function () {
-	console.log('DEV server listening on port 3000!');
+app.listen(3999, function () {
+	console.log('DEV server listening on port 3999!');
 });
 
 module.exports = app;
