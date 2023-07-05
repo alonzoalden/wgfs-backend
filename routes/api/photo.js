@@ -1,5 +1,8 @@
 const router = require('express').Router();
 const multer = require("multer");
+const path = require('path');
+const fs = require('fs');
+const async = require('async');
 
 const handleError = (err, res) => {
   res
@@ -9,14 +12,18 @@ const handleError = (err, res) => {
 };
 
 const upload = multer({
-	dest: "/path/to/temporary/directory/to/store/uploaded/files"
+	dest: "/Users/alonzoalden/Code/wilshiregroupfinancial/wfgs-backend/routes/assets",
+	limits: {
+		files: 8,
+		fileSize: 10000000
+	}
 	// you might also want to set some limits: https://github.com/expressjs/multer#limits
   });
-
 router.get('/links', (req, res) => {
 	try {
 
 		// look in database and get url1 url2
+		fs.readFile
 
 	} catch (error) {
 		res.status(500).send({
@@ -25,47 +32,65 @@ router.get('/links', (req, res) => {
 		});
 	}
 });
-router.post('/photo', upload.single("file"), (req, res) => {
+
+router.post('/photo', upload.array('file'), (req, res) => {
 	try {
 
-		console.log('req, res', req.file);
-		console.log('req, res', req.files);
+		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
+		const imagesPath = path.join(__dirname, `../../../assets/WGFS-images.json`);
+		const imagePaths = [];
 
-		const tempPath = req.file.path;
-		const targetPath = path.join(__dirname, "./uploads/image.png");
+		fs.writeFile(textPath, JSON.stringify({ links: req.body.link }), (err) => {
+			if (err) {
+				console.error('Error');
+			}
+		});
+		async.eachOf(req.files, (file, index, callback) => {
 
-		if (path.extname(req.file.originalname).toLowerCase() === ".png") {
-			fs.rename(tempPath, targetPath, err => {
-			  if (err) return handleError(err, res);
+			const tempPath = file.path;
+			const imagePath = `../../../assets/WGFS-${file.originalname}`;
+			imagePaths.push(`WGFS-${file.originalname}`);
+			const targetPath = path.join(__dirname, imagePath);
+			if (path.extname(file.originalname).toLowerCase() === ".png") {
 
-			  res
+				fs.rename(tempPath, targetPath, callback);
+
+
+			} else {
+
+				fs.unlink(tempPath, err => {
+					if (err) return handleError(err, res);
+
+					res
+						.status(403)
+						.contentType("text/plain")
+						.end("Only .png files are allowed!");
+				});
+
+			}
+
+		}, () => {
+
+			fs.writeFile(imagesPath, JSON.stringify({ images: imagePaths }), (err) => {
+				if (err) {
+					console.error('Error');
+				}
+			});
+
+			res
 				.status(200)
 				.contentType("text/plain")
 				.end("File uploaded!");
-			});
-		  } else {
-			fs.unlink(tempPath, err => {
-			  if (err) return handleError(err, res);
 
-			  res
-				.status(403)
-				.contentType("text/plain")
-				.end("Only .png files are allowed!");
-			});
-		  }
+		})
 
 
 		// accept file
 		// format file to 600px width
 		// format file to webp
-		// save image to local disk
-		// save fields url1 url2
 
 
 
-		// to do first:
-		// set up database with fields: url1 url2
-		// or set as text file ?
 		// make /content folder on localdisk accessible from page
 
 
