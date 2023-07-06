@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require('path');
 const fs = require('fs');
 const async = require('async');
+const sharp = require('sharp');
 
 const handleError = (err, res) => {
   res
@@ -12,33 +13,22 @@ const handleError = (err, res) => {
 };
 
 const upload = multer({
-	dest: "/Users/alonzoalden/Code/wilshiregroupfinancial/wfgs-backend/routes/assets",
+	dest: path.join(__dirname, `../../../assets/temp`),
 	limits: {
 		files: 8,
 		fileSize: 10000000
 	}
 	// you might also want to set some limits: https://github.com/expressjs/multer#limits
   });
-router.get('/links', (req, res) => {
-	try {
+router.get('/photo', (req, res) => {
 
-		// look in database and get url1 url2
-		fs.readFile
+	res.sendFile(path.join(__dirname, '../../../assets/WGFS-link.json'));
 
-	} catch (error) {
-		res.status(500).send({
-			success: false,
-			message: 'Something went wrong. Try again later 1'
-		});
-	}
 });
-
 router.post('/photo', upload.array('file'), (req, res) => {
 	try {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
-		const imagesPath = path.join(__dirname, `../../../assets/WGFS-images.json`);
-		const imagePaths = [];
 
 		fs.writeFile(textPath, JSON.stringify({ links: req.body.link }), (err) => {
 			if (err) {
@@ -47,14 +37,20 @@ router.post('/photo', upload.array('file'), (req, res) => {
 		});
 		async.eachOf(req.files, (file, index, callback) => {
 
-			const tempPath = file.path;
-			const imagePath = `../../../assets/WGFS-${file.originalname}`;
-			imagePaths.push(`WGFS-${file.originalname}`);
-			const targetPath = path.join(__dirname, imagePath);
-			if (path.extname(file.originalname).toLowerCase() === ".png") {
+			const accepted = ['.png', '.jpg', '.jpeg'];
+
+			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
+
+				const imagePath = `../../../assets/WGFS-${file.originalname}`;
+				const targetPath = path.join(__dirname, imagePath);
+				const tempPath = file.path;
+				const nameNoExt = file.originalname.split('.')[0];
+				const finalImagePath = `../../../assets/WGFS-${nameNoExt+'.webp'}`;
+				const finalTargetPath = path.join(__dirname, finalImagePath);
 
 				fs.rename(tempPath, targetPath, callback);
 
+				sharp(targetPath).resize(600, 849).webp().toFile(finalTargetPath);
 
 			} else {
 
@@ -64,18 +60,12 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					res
 						.status(403)
 						.contentType("text/plain")
-						.end("Only .png files are allowed!");
+						.end("Only .png .jpg .jpeg files are allowed!");
 				});
 
 			}
 
 		}, () => {
-
-			fs.writeFile(imagesPath, JSON.stringify({ images: imagePaths }), (err) => {
-				if (err) {
-					console.error('Error');
-				}
-			});
 
 			res
 				.status(200)
@@ -84,21 +74,15 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 		})
 
-
-		// accept file
-		// format file to 600px width
-		// format file to webp
-
-
-
 		// make /content folder on localdisk accessible from page
 
-
 	} catch (error) {
+
 		res.status(500).send({
 			success: false,
 			message: 'Something went wrong. Try again later 1'
 		});
+
 	}
 });
 
