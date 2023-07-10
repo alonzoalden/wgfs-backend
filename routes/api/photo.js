@@ -74,7 +74,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 				const finalTargetPath = path.join(__dirname, finalImagePath);
 
 				fs.rename(file.path, targetPath, callback);
-
+				console.log('do we get this far')
 				sharp(targetPath).resize(600, 849).webp().toFile(finalTargetPath);
 
 			} else {
