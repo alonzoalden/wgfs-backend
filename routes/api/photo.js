@@ -64,9 +64,9 @@ router.post('/photo', upload.array('file'), (req, res) => {
 		async.eachOf(req.files, (file, index, callback) => {
 
 			const accepted = ['.png', '.jpg', '.jpeg'];
-
+			console.log('do we get this far 1')
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
-
+				console.log('do we get this far 2)
 				const imagePath = `../../../assets/WGFS-${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
 				const nameNoExt = file.originalname.split('.')[0];
@@ -74,7 +74,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 				const finalTargetPath = path.join(__dirname, finalImagePath);
 
 				fs.rename(file.path, targetPath, callback);
-				console.log('do we get this far')
+
 				sharp(targetPath).resize(600, 849).webp().toFile(finalTargetPath);
 
 			} else {
