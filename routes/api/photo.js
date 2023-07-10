@@ -14,7 +14,7 @@ const handleError = (err, res) => {
 };
 
 const upload = multer({
-	dest: path.join(__dirname, `../../../assets/temp`),
+	dest: path.join(__dirname, `../../../html/static/temp`),
 	limits: {
 		files: 8,
 		fileSize: 10000000
@@ -57,16 +57,16 @@ router.get('/photo', cors(), (req, res) => {
 router.post('/photo', upload.array('file'), (req, res) => {
 	try {
 
-		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
+		const textPath = path.join(__dirname, `../../../html/static/WGFS-link.json`);
 
 		async.each(req.files, (file, callback) => {
 
 			const accepted = ['.png', '.jpg', '.jpeg'];
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
-				const imagePath = `../../../assets/WGFS-${file.originalname}`;
+				const imagePath = `../../../html/static/WGFS-${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
 				const nameNoExt = file.originalname.split('.')[0];
-				const finalImagePath = `../../../assets/WGFS-${nameNoExt+'.webp'}`;
+				const finalImagePath = `../../../html/static/WGFS-${nameNoExt+'.webp'}`;
 				const finalTargetPath = path.join(__dirname, finalImagePath);
 
 				fs.rename(file.path, targetPath, callback);
