@@ -66,7 +66,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 			const accepted = ['.png', '.jpg', '.jpeg'];
 			console.log('do we get this far 1')
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
-				console.log('do we get this far 2)
+				console.log('do we get this far 2');
 				const imagePath = `../../../assets/WGFS-${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
 				const nameNoExt = file.originalname.split('.')[0];
