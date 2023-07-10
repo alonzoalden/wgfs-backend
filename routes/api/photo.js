@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const async = require('async');
 const sharp = require('sharp');
+const cors = require('cors')
 
 const handleError = (err, res) => {
   res
@@ -21,13 +22,13 @@ const upload = multer({
 	// you might also want to set some limits: https://github.com/expressjs/multer#limits
 });
 
-router.get('/photo', (req, res) => {
+router.get('/photo', cors(), (req, res) => {
 
 	res.sendFile(path.join(__dirname, '../../../assets/WGFS-link.json'));
 
 });
 
-router.post('/photo', upload.array('file'), (req, res) => {
+router.post('/photo', cors(), upload.array('file'), (req, res) => {
 	try {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);

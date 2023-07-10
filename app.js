@@ -9,7 +9,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 //Global app object
 const app = express();
 
-app.use(cors({origin: 'http://localhost:8000 '}));
+// app.use(cors({origin: 'http://localhost:8000'}));
+app.use(cors())
 // Normal express config defaults
 // app.use(require('morgan')('dev'));
 // app.use(bodyParser.urlencoded({ extended: false }));
