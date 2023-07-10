@@ -24,7 +24,7 @@ const upload = multer({
 
 router.get('/photo', cors(), (req, res) => {
 
-	const jsonFilePath = path.join(__dirname, '../../../assets/WGFS-link.json');
+	const jsonFilePath = path.join(__dirname, '../../../html/static/WGFS-link.json');
 
 	try {
 
