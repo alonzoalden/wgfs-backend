@@ -24,7 +24,33 @@ const upload = multer({
 
 router.get('/photo', cors(), (req, res) => {
 
-	res.sendFile(path.join(__dirname, '../../../assets/WGFS-link.json'));
+	const jsonFilePath = path.join(__dirname, '../../../assets/WGFS-link.json');
+
+	try {
+
+		const exists = fs.existsSync(jsonFilePath);
+
+		if (exists) {
+
+			res.sendFile(jsonFilePath);
+
+
+		} else {
+
+			res.send({});
+
+		}
+
+	} catch (error) {
+
+		res.status(500).send({
+			success: false,
+			message: 'Something went wrong. Try again later'
+		});
+
+	}
+
+
 
 });
 
