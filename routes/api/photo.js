@@ -19,22 +19,19 @@ const upload = multer({
 		fileSize: 10000000
 	}
 	// you might also want to set some limits: https://github.com/expressjs/multer#limits
-  });
+});
+
 router.get('/photo', (req, res) => {
 
 	res.sendFile(path.join(__dirname, '../../../assets/WGFS-link.json'));
 
 });
+
 router.post('/photo', upload.array('file'), (req, res) => {
 	try {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
 
-		fs.writeFile(textPath, JSON.stringify({ links: req.body.link }), (err) => {
-			if (err) {
-				console.error('Error');
-			}
-		});
 		async.eachOf(req.files, (file, index, callback) => {
 
 			const accepted = ['.png', '.jpg', '.jpeg'];
@@ -43,12 +40,11 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 				const imagePath = `../../../assets/WGFS-${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
-				const tempPath = file.path;
 				const nameNoExt = file.originalname.split('.')[0];
 				const finalImagePath = `../../../assets/WGFS-${nameNoExt+'.webp'}`;
 				const finalTargetPath = path.join(__dirname, finalImagePath);
 
-				fs.rename(tempPath, targetPath, callback);
+				fs.rename(file.path, targetPath, callback);
 
 				sharp(targetPath).resize(600, 849).webp().toFile(finalTargetPath);
 
@@ -67,10 +63,31 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 		}, () => {
 
-			res
-				.status(200)
-				.contentType("text/plain")
-				.end("File uploaded!");
+			let jsonData = [];
+			if (req.body.link.length) {
+
+				// Type: req.body.link: string[]
+				jsonData = req.body.link.map((link, index) => ({
+					link,
+					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
+				}))
+
+			}
+
+			fs.writeFile(textPath, JSON.stringify(jsonData), (err) => {
+				if (err) {
+					console.error('Error');
+					res.status(500).send({
+						success: false,
+						message: 'Something went wrong.Check fs.writeFile'
+					});
+				}
+
+				res
+					.status(200)
+					.contentType("text/plain")
+					.end("File uploaded!");
+			});
 
 		})
 
