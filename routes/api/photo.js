@@ -59,15 +59,10 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
 
-		console.log('req.files: ', req.files);
-		console.log('req.body: ', req.body);
-
 		async.each(req.files, (file, callback) => {
 
 			const accepted = ['.png', '.jpg', '.jpeg'];
-			console.log('do we get this far 1')
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
-				console.log('do we get this far 2');
 				const imagePath = `../../../assets/WGFS-${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
 				const nameNoExt = file.originalname.split('.')[0];
@@ -94,7 +89,16 @@ router.post('/photo', upload.array('file'), (req, res) => {
 		}, () => {
 
 			let jsonData = [];
-			if (req.body.link.length > 1) {
+			if (typeof req.body.link === 'string') {
+
+				// Type: req.body.link: string
+				// Form data sends only string if 1 value. But turns into array once appended value
+				jsonData = [{
+					link: req.body.link,
+					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer1.webp`
+				}]
+
+			} else {
 
 				// Type: req.body.link: string[]
 				jsonData = req.body.link.map((link, index) => ({
@@ -102,13 +106,6 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
 				}))
 
-			} else {
-
-				// Type: req.body.link: string
-				jsonData = [{
-					link: req.body.link,
-					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
-				}]
 			}
 
 			fs.writeFile(textPath, JSON.stringify(jsonData), (err) => {
