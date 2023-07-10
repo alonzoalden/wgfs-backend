@@ -6,6 +6,13 @@ const async = require('async');
 const sharp = require('sharp');
 const cors = require('cors')
 
+app.use(cors())
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    next();
+});
+
 const handleError = (err, res) => {
   res
     .status(500)
