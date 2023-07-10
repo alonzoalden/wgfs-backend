@@ -59,7 +59,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
 
-		console.log('req.files: ', req.files);
+		console.log('req.body: ', req.body);
 
 		async.each(req.files, (file, callback) => {
 
