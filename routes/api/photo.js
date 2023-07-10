@@ -59,10 +59,10 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
 
-		console.log('async: ', async);
+		console.log('req.files: ', req.files);
 
-		async.eachOf(req.files, (file, index, callback) => {
-			console.log('do we get this far 0');
+		async.each(req.files, (file, callback) => {
+
 			const accepted = ['.png', '.jpg', '.jpeg'];
 			console.log('do we get this far 1')
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
