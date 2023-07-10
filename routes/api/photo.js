@@ -59,6 +59,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
 
+		console.log('req.files: ', req.files);
 		console.log('req.body: ', req.body);
 
 		async.each(req.files, (file, callback) => {
@@ -93,7 +94,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 		}, () => {
 
 			let jsonData = [];
-			if (req.body.link.length) {
+			if (req.body.link.length > 1) {
 
 				// Type: req.body.link: string[]
 				jsonData = req.body.link.map((link, index) => ({
@@ -101,6 +102,13 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
 				}))
 
+			} else {
+
+				// Type: req.body.link: string
+				jsonData = [{
+					link: req.body.link,
+					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
+				}]
 			}
 
 			fs.writeFile(textPath, JSON.stringify(jsonData), (err) => {
