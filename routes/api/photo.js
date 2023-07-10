@@ -95,7 +95,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 				// Form data sends only string if 1 value. But turns into array once appended value
 				jsonData = [{
 					link: req.body.link,
-					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer1.webp`
+					flyerUrl: `https://alonzoalden.com/static/WGFS-flyer1.webp`
 				}]
 
 			} else {
@@ -103,7 +103,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 				// Type: req.body.link: string[]
 				jsonData = req.body.link.map((link, index) => ({
 					link,
-					flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
+					flyerUrl: `https://alonzoalden.com/static/WGFS-flyer${index + 1}.webp`
 				}))
 
 			}
