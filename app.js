@@ -1,18 +1,18 @@
 const express = require('express');
 const errorhandler = require('errorhandler');
-//const cors = require('cors');
+const cors = require('cors');
 
 const isProduction = process.env.NODE_ENV === 'production';
 //Global app object
 const app = express();
 
-// const corsOptions ={
-//    origin: '*',
-//    credentials: true,            //access-control-allow-credentials:true
-//    optionSuccessStatus: 200,
-// }
+const corsOptions ={
+   origin: ['https://alonzoalden.com', 'https://www.alonzoalden.com'],
+   credentials: true,            //access-control-allow-credentials:true
+   optionSuccessStatus: 200,
+}
 
-// app.use(cors(corsOptions)) // Use this after the variable declaration
+app.use(cors(corsOptions));
 
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb', extended: true, parameterLimit:50000 }));
