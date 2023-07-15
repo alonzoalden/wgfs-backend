@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const async = require('async');
 const sharp = require('sharp');
-const cors = require('cors')
 
 const handleError = (err, res) => {
   res
@@ -22,7 +21,7 @@ const upload = multer({
 	// you might also want to set some limits: https://github.com/expressjs/multer#limits
 });
 
-router.get('/photo', cors(), (req, res) => {
+router.get('/photo', (req, res) => {
 
 	const jsonFilePath = path.join(__dirname, '../../../assets/WGFS-link.json');
 
@@ -74,9 +73,13 @@ router.post('/photo', upload.array('file'), (req, res) => {
 				fs.rename(file.path, targetPath, () => {
 
 					// Remove temp path
-					// fs.unlink(tempPath, (err) => console.log(err));
+					const exists = fs.existsSync(tempPath);
+					// This used to not remove temp path automatically, so now we're checking if file exists first
+					if (exists) {
 
-					// ^ blanked out because it started removing on it's own ..?
+						fs.unlink(tempPath, (err) => console.log(err));
+
+					}
 
 				});
 
@@ -153,7 +156,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 						const extraImages = imageFiles.splice(jsonData.length);
 						for (let i = 0; i < extraImages.length; i++) {
 
-							fs.unlink(path.join(__dirname, `../../../assets/${extraImages[i]}`), (err) => console.log(err));
+							fs.unlink(path.join(__dirname, `../../../assets/${extraImages[i]}`), (err) => console.log('err'));
 
 						}
 					}
