@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const async = require('async');
 const sharp = require('sharp');
-
+const host = `https://wilshiregfs.com`;
 const handleError = (err, res) => {
   res
     .status(500)
@@ -117,7 +117,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					// Form data sends only string if 1 value. But turns into array once appended value
 					jsonData = [{
 						link: req.body.link,
-						flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer1.webp`
+						flyerUrl: `${host}/assets/WGFS-flyer1.webp`
 					}]
 
 				} else {
@@ -125,7 +125,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					// Type: req.body.link: string[]
 					jsonData = req.body.link.map((link, index) => ({
 						link,
-						flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
+						flyerUrl: `${host}/assets/WGFS-flyer${index + 1}.webp`
 					}))
 
 				}
