@@ -147,7 +147,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 				// Remove any extra images when user removes images
 				fs.readdir(path.join(__dirname, '../../../assets'), (err, files) => {
 
-					if (err) console.log('err')
+					if (err) console.log('err 1')
 
 					const imageFiles = files.filter((file) => file.includes('.webp') && file.includes('WGFS-flyer'));
 
@@ -156,7 +156,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 						const extraImages = imageFiles.splice(jsonData.length);
 						for (let i = 0; i < extraImages.length; i++) {
 
-							fs.unlink(path.join(__dirname, `../../../assets/${extraImages[i]}`), (err) => console.log('err'));
+							fs.unlink(path.join(__dirname, `../../../assets/${extraImages[i]}`), (err) => console.log('err 2'));
 
 						}
 					}
