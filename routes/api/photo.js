@@ -14,7 +14,7 @@ const handleError = (err, res) => {
 };
 
 const upload = multer({
-	dest: path.join(__dirname, `../../../html/static/temp`),
+	dest: path.join(__dirname, `../../../assets/temp`),
 	limits: {
 		files: 8,
 		fileSize: 10000000
@@ -24,7 +24,7 @@ const upload = multer({
 
 router.get('/photo', cors(), (req, res) => {
 
-	const jsonFilePath = path.join(__dirname, '../../../html/static/WGFS-link.json');
+	const jsonFilePath = path.join(__dirname, '../../../assets/WGFS-link.json');
 
 	try {
 
@@ -57,21 +57,37 @@ router.get('/photo', cors(), (req, res) => {
 router.post('/photo', upload.array('file'), (req, res) => {
 	try {
 
-		const textPath = path.join(__dirname, `../../../html/static/WGFS-link.json`);
+		const textPath = path.join(__dirname, `../../../assets/WGFS-link.json`);
 
 		async.each(req.files, (file, callback) => {
 
+			const tempPath = file.path;
+
 			const accepted = ['.png', '.jpg', '.jpeg'];
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
-				const imagePath = `../../../html/static/WGFS-${file.originalname}`;
+				const imagePath = `../../../assets/WGFS-${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
 				const nameNoExt = file.originalname.split('.')[0];
-				const finalImagePath = `../../../html/static/WGFS-${nameNoExt+'.webp'}`;
+				const finalImagePath = `../../../assets/WGFS-${nameNoExt+'.webp'}`;
 				const finalTargetPath = path.join(__dirname, finalImagePath);
 
-				fs.rename(file.path, targetPath, callback);
+				fs.rename(file.path, targetPath, () => {
 
-				sharp(targetPath).resize(600, 849).webp().toFile(finalTargetPath);
+					// Remove temp path
+					// fs.unlink(tempPath, (err) => console.log(err));
+
+					// ^ blanked out because it started removing on it's own ..?
+
+				});
+
+				sharp(targetPath).resize({
+					fit: sharp.fit.contain,
+					width: 600
+				}).webp().toFile(finalTargetPath).then(() => {
+
+					fs.unlink(targetPath, callback);
+
+				});
 
 			} else {
 
@@ -89,22 +105,27 @@ router.post('/photo', upload.array('file'), (req, res) => {
 		}, () => {
 
 			let jsonData = [];
-			if (typeof req.body.link === 'string') {
 
-				// Type: req.body.link: string
-				// Form data sends only string if 1 value. But turns into array once appended value
-				jsonData = [{
-					link: req.body.link,
-					flyerUrl: `https://alonzoalden.com/static/WGFS-flyer1.webp`
-				}]
+			if (req.body && req.body.link) {
 
-			} else {
+				if (typeof req.body.link === 'string') {
 
-				// Type: req.body.link: string[]
-				jsonData = req.body.link.map((link, index) => ({
-					link,
-					flyerUrl: `https://alonzoalden.com/static/WGFS-flyer${index + 1}.webp`
-				}))
+					// Type: req.body.link: string
+					// Form data sends only string if 1 value. But turns into array once appended value
+					jsonData = [{
+						link: req.body.link,
+						flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer1.webp`
+					}]
+
+				} else {
+
+					// Type: req.body.link: string[]
+					jsonData = req.body.link.map((link, index) => ({
+						link,
+						flyerUrl: `https://alonzoalden.com/assets/WGFS-flyer${index + 1}.webp`
+					}))
+
+				}
 
 			}
 
@@ -117,15 +138,31 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					});
 				}
 
-				res
-					.status(200)
-					.contentType("text/plain")
-					.end("File uploaded!");
+				res.status(200).contentType("text/plain").end("File uploaded!");
+
+
+				// Remove any extra images when user removes images
+				fs.readdir(path.join(__dirname, '../../../assets'), (err, files) => {
+
+					if (err) console.log('err')
+
+					const imageFiles = files.filter((file) => file.includes('.webp') && file.includes('WGFS-flyer'));
+
+					if (jsonData.length < imageFiles.length) {
+
+						const extraImages = imageFiles.splice(jsonData.length);
+						for (let i = 0; i < extraImages.length; i++) {
+
+							fs.unlink(path.join(__dirname, `../../../assets/${extraImages[i]}`), (err) => console.log(err));
+
+						}
+					}
+
+				});
+
 			});
 
 		})
-
-		// make /content folder on localdisk accessible from page
 
 	} catch (error) {
 
