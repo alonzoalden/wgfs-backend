@@ -7,8 +7,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 
 const corsOptions ={
-   origin: ['https://wilshiregfs.com', 'https://www.wilshiregfs.com'],
-   //origin: '*',
+   //origin: ['https://wilshiregfs.com', 'https://www.wilshiregfs.com'],
+   origin: '*',
    credentials: true,            //access-control-allow-credentials:true
    optionSuccessStatus: 200,
 }
