@@ -5,8 +5,7 @@ const fs = require('fs');
 const async = require('async');
 const sharp = require('sharp');
 
-// const host = `https://wilshiregfs.com`;
-const host = `https://alonzoalden.com`;
+const host = `https://wilshiregfs.com`;
 const assetsPath = `../../../assets`;
 
 const upload = multer({
@@ -133,8 +132,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 					// Remove temp path
 					const exists = fs.existsSync(tempPath);
-					console.log('tempPath: ', tempPath)
-					console.log('exists: ', exists)
+
 					// This used to not remove temp path automatically, so now we're checking if file exists first
 					if (exists) {
 
