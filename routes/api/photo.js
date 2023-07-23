@@ -5,22 +5,78 @@ const fs = require('fs');
 const async = require('async');
 const sharp = require('sharp');
 
-const host = `https://wilshiregfs.com`;
+// const host = `https://wilshiregfs.com`;
+const host = `https://alonzoalden.com`;
 const assetsPath = `../../../assets`;
+
 const upload = multer({
 	dest: path.join(__dirname, `${assetsPath}/temp`),
 	limits: {
 		files: 8,
 		fileSize: 10000000
 	}
-	// you might also want to set some limits: https://github.com/expressjs/multer#limits
+	// multer limits: https://github.com/expressjs/multer#limits
 });
+
 const handleError = (err, res) => {
 	res
-	  .status(500)
-	  .contentType("text/plain")
-	  .end("Oops! Something went wrong!");
+		.status(500)
+		.contentType("text/plain")
+		.end("Oops! Something went wrong!");
 };
+
+const parseName = (name) => {
+
+	if (name.includes('.png')) {
+
+		return name.split('.png')[0];
+
+	} else if (name.includes('.webp')) {
+
+		return name.split('.webp')[0];
+
+	} else if (name.includes('.jpeg')) {
+
+		return name.split('.jpeg')[0];
+
+	}
+
+};
+
+const removeUnusedFiles = (jsonData) => {
+
+	// Remove any extra images when user removes images
+
+	fs.readdir(path.join(__dirname, '../../../assets'), (err, files) => {
+
+		if (err) console.log('err reading assets dir', err)
+
+		const imageFiles = files.filter((file) => file.includes('.webp') && file.includes('WGFS-Flyer'));
+
+		if (jsonData.length && imageFiles.length) {
+
+			imageFiles.forEach((fileName) => {
+
+				const found = jsonData.find((data) => {
+
+					return parseName(fileName) === parseName(data.flyerName);
+
+				})
+
+				if (!found) {
+
+					// delete...
+					fs.unlink(path.join(__dirname, `../../../assets/${fileName}`), (err) => console.log('err deleting file', err));
+
+				}
+
+			})
+
+		}
+
+	});
+
+}
 
 router.get('/photo', (req, res) => {
 
@@ -67,8 +123,8 @@ router.post('/photo', upload.array('file'), (req, res) => {
 			if (accepted.includes(path.extname(file.originalname).toLowerCase())) {
 				const imagePath = `${assetsPath}/${file.originalname}`;
 				const targetPath = path.join(__dirname, imagePath);
-				const nameNoExt = file.originalname.split('.')[0];
-				const finalImagePath = `${assetsPath}/${nameNoExt+'.webp'}`;
+				const nameNoExt = file.originalname.split('.png')[0];
+				const finalImagePath = `${assetsPath}/${nameNoExt + '.webp'}`;
 				const finalTargetPath = path.join(__dirname, finalImagePath);
 
 				fs.rename(file.path, targetPath, () => {
@@ -110,24 +166,31 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 			let jsonData = [];
 
-			if (req.body && req.body.flyerInfo) {
+			if (req.body && req.body.link && req.body.flyerName) {
 
-				if (Array.isArray(req.body.flyerInfo)) {
+				if (Array.isArray(req.body.link)) {
 
 					// Type: req.body.link: string[]
-					jsonData = req.body.flyerInfo.map((info) => ({
-						link: info.link,
-						flyerUrl: `${host}/assets/${info.flyerName}.webp`
-					}))
+					jsonData = req.body.link.map((link, i) => {
+
+						const flyerName = req.body.flyerName[i];
+
+						return {
+							link,
+							flyerName,
+							flyerUrl: `${host}/assets/${parseName(flyerName)}.webp`
+						}
+
+					});
 
 				} else {
 
-					// Type: req.body.flyerInfo: { link: string, flyerName: string }
 					// Form data sends only string if 1 value. But turns into array once appended value
 					jsonData = [{
-						link: req.body.flyerInfo.link,
-						flyerUrl: `${host}/assets/${info.flyerName}.webp`
-					}]
+						link: req.body.link,
+						flyerName,
+						flyerUrl: `${host}/assets/${parseName(req.body.flyerName)}.webp`
+					}];
 
 				}
 
@@ -144,30 +207,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 				res.status(200).contentType("text/plain").end("File uploaded!");
 
-
-				// Look at what's in the directory
-				// for each item in the directory check if it exists in jsonData.flyerUrl
-				// if not, remove file
-
-
-				// Remove any extra images when user removes images
-				// fs.readdir(path.join(__dirname, '../../../assets'), (err, files) => {
-
-				// 	if (err) console.log('err 1')
-
-				// 	const imageFiles = files.filter((file) => file.includes('.webp') && file.includes('WGFS-flyer'));
-
-				// 	if (jsonData.length < imageFiles.length) {
-
-				// 		const extraImages = imageFiles.splice(jsonData.length);
-				// 		for (let i = 0; i < extraImages.length; i++) {
-
-				// 			fs.unlink(path.join(__dirname, `../../../assets/${extraImages[i]}`), (err) => console.log('err 2'));
-
-				// 		}
-				// 	}
-
-				// });
+				removeUnusedFiles(jsonData);
 
 			});
 
