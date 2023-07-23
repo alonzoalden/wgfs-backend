@@ -61,7 +61,6 @@ const removeUnusedFiles = (jsonData) => {
 
 				const found = jsonData.find((data) => {
 
-					console.log(parseName(fileName), data.flyerName)
 					return parseName(fileName) === data.flyerName;
 
 				})
@@ -134,6 +133,8 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 					// Remove temp path
 					const exists = fs.existsSync(tempPath);
+					console.log('tempPath: ', tempPath)
+					console.log('exists: ', exists)
 					// This used to not remove temp path automatically, so now we're checking if file exists first
 					if (exists) {
 
