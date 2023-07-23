@@ -41,6 +41,8 @@ const parseName = (name) => {
 
 	}
 
+	return name;
+
 };
 
 const removeUnusedFiles = (jsonData) => {
@@ -59,14 +61,15 @@ const removeUnusedFiles = (jsonData) => {
 
 				const found = jsonData.find((data) => {
 
-					return parseName(fileName) === parseName(data.flyerName);
+					console.log(parseName(fileName), data.flyerName)
+					return parseName(fileName) === data.flyerName;
 
 				})
 
 				if (!found) {
 
 					// delete...
-					fs.unlink(path.join(__dirname, `../../../assets/${fileName}`), (err) => console.log('err deleting file', err));
+					fs.unlink(path.join(__dirname, `../../../assets/${fileName}`), (err) => err ? console.log('err deleting file', err) : '');
 
 				}
 
@@ -134,7 +137,7 @@ router.post('/photo', upload.array('file'), (req, res) => {
 					// This used to not remove temp path automatically, so now we're checking if file exists first
 					if (exists) {
 
-						fs.unlink(tempPath, (err) => console.log(err));
+						fs.unlink(tempPath, (err) => err ? console.log(err) : '');
 
 					}
 
@@ -170,26 +173,26 @@ router.post('/photo', upload.array('file'), (req, res) => {
 
 				if (Array.isArray(req.body.link)) {
 
-					// Type: req.body.link: string[]
 					jsonData = req.body.link.map((link, i) => {
 
-						const flyerName = req.body.flyerName[i];
+						const flyerName = parseName(req.body.flyerName[i]);
 
 						return {
 							link,
 							flyerName,
-							flyerUrl: `${host}/assets/${parseName(flyerName)}.webp`
+							flyerUrl: `${host}/assets/${flyerName}.webp`
 						}
 
 					});
 
 				} else {
 
+					const flyerName = parseName(req.body.flyerName);
 					// Form data sends only string if 1 value. But turns into array once appended value
 					jsonData = [{
 						link: req.body.link,
 						flyerName,
-						flyerUrl: `${host}/assets/${parseName(req.body.flyerName)}.webp`
+						flyerUrl: `${host}/assets/${flyerName}.webp`
 					}];
 
 				}
